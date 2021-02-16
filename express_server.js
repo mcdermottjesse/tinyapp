@@ -23,6 +23,9 @@ app.set("view engine", "ejs");
 
 
 const urlDatabase = {
+
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
   
 };
 
@@ -61,6 +64,12 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
   console.log(urlDatabase);  // Log the POST request body to the console
+  res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:shortURL", (req, res) => { //accesses edit action from form tag?
+  let shortURL = req.params.shortURL
+  urlDatabase[shortURL] = req.body.longURL //body reps data in the specific form
   res.redirect(`/urls/${shortURL}`);
 });
 
