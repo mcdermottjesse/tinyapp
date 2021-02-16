@@ -3,8 +3,17 @@ const app = express();
 const bodyParser = require("body-parser");
 const PORT = 8080; // default port 8080
 
+function generateRandomString() {
+  let ranChars = ''
+   let letters = "zxyqrv"
+   
+   for (let i = 0; i < 6; i++)
+   ranChars += letters.charAt(Math.floor(Math.random() * letters.length));
+   return ranChars
+ 
+  };
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended: true})); //replaces JSON.parse
 
 
 app.set("view engine", "ejs");
@@ -35,8 +44,16 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
 
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
+/*
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -49,7 +66,4 @@ app.get("/set", (req, res) => {
  app.get("/fetch", (req, res) => {
   res.send(`a = ${a}`);
  });
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+*/
