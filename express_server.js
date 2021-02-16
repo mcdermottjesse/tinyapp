@@ -5,10 +5,10 @@ const PORT = 8080; // default port 8080
 
 function generateRandomString() {
   let ranChars = '';
-  let letters = "abcdefghijklmnopqrstuvwxyz";
+  let letrNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789";
 
   for (let i = 0; i < 6; i++) {
-    ranChars += letters.charAt(Math.floor(Math.random() * letters.length));
+    ranChars += letrNum.charAt(Math.floor(Math.random() * letrNum.length));
 
   }
   return ranChars;
@@ -23,8 +23,7 @@ app.set("view engine", "ejs");
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  
 };
 
 
@@ -38,7 +37,7 @@ app.get("/urls", (req, res) => {
 });
 
 
-app.get("/u/:shortURL", (req, res) => {
+app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in url
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL];
     res.redirect(longURL); //redirects to long url webpage once short url has been created
@@ -52,6 +51,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+
 app.get("/", (req, res) => { // "/" home page
   res.send("Hello!");
 });
@@ -62,6 +62,11 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = longURL;
   console.log(urlDatabase);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from form tag
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 
