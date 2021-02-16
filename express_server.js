@@ -37,6 +37,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+if (urlDatabase[req.params.shortURL]) {
+ const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL); //redirects to long url webpage once short url has been created
+} else {
+  res.send("404 Bad Request")
+} 
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
