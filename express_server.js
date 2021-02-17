@@ -28,6 +28,16 @@ function generateRandomString() {
   return ranChars;
 };
 
+function emailExists(email) {
+  for(let user in users) {
+    if (users[user].email === email) {
+      console.log("inside true loop")
+      return true
+    }
+  }
+return false
+}
+
 
 const urlDatabase = {
 
@@ -72,16 +82,27 @@ app.get("/register", (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  let userID = generateRandomString();
-  users[userID] = {
-    id: userID,
-    email: req.body.email,//remember req.body contains the form data
-    password: req.body.password
-  };
+ 
+  if ((!req.body.email) || (!req.body.password) || (emailExists(req.body.email))) {
+    console.log(req.body)
+    res.status(400).send("Bad Request")
+  } else {
+    let userID = generateRandomString();
+    users[userID] = {
+      id: userID,
+      email: req.body.email,//remember req.body contains the form data
+      password: req.body.password
+    };
   console.log(users[userID]);
   res.cookie('user_id', userID);
   res.redirect("/urls");
   generateRandomString();
+  }
+});
+
+app.get("/login", (req, res) => {
+
+  res.render("urls_login");
 });
 
 
@@ -90,7 +111,7 @@ app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in ur
     const longURL = urlDatabase[req.params.shortURL];
     res.redirect(longURL); //redirects to long url webpage once short url has been created
   } else {
-    res.send("404 Bad Request");
+    res.status(404).send("404 Not Found");
   }
 });
 
