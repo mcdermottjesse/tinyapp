@@ -1,9 +1,21 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const morgan = require('morgan')
+const cookieParser = require('cookie-parser');
+// we need cookies so subsequent http requests can be associated with prev requests 
+//via the value stored on browser
+//as http itself is stateless
 const app = express();
-app.use(cookieParser())
-const bodyParser = require("body-parser");
+const bodyParser = require("body-parser"); //for form values
 const PORT = 8080; // default port 8080
+
+//Middleware
+
+app.use(bodyParser.urlencoded({ extended: true })); //replaces JSON.parse
+app.use(morgan('combined'))
+app.use(cookieParser());
+
+
+app.set("view engine", "ejs");
 
 function generateRandomString() {
   let ranChars = '';
@@ -17,41 +29,64 @@ function generateRandomString() {
 };
 
 
-app.use(bodyParser.urlencoded({ extended: true })); //replaces JSON.parse
-
-
-app.set("view engine", "ejs");
-
-
-
 const urlDatabase = {
 
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
-  
+
+};
+
+const users = {
+  userID: {
+    id: "userID",
+    email: "user@example.com",
+    password: "password"
+  }
 };
 
 
-
 app.get("/urls/new", (req, res) => {
+  const id = req.cookies["user_id"]
+  const user = users[id]
   const templateVars = {
-     username: req.cookies["username"]
-  }
-   ///urls/new represents path
+    urls: urlDatabase,
+    user: user
+  };
+  ///urls/new represents path
   res.render("urls_new", templateVars); //urls_new represents ejs file
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const id = req.cookies["user_id"]
+  const user = users[id]
+  const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: user
   };
   res.render("urls_index", templateVars);
 });
 
+app.get("/register", (req, res) => {
+
+  res.render("urls_register");
+});
+
+app.post('/register', (req, res) => {
+  let userID = generateRandomString();
+  users[userID] = {
+    id: userID,
+    email: req.body.email,//remember req.body contains the form data
+    password: req.body.password
+  };
+  console.log(users[userID]);
+  res.cookie('user_id', userID);
+  res.redirect("/urls");
+  generateRandomString();
+});
+
 
 app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in url
-  if (urlDatabase[req.params.shortURL]) {
+  if (urlDatabase[req.params.shortURL]) { //.params contains URL paramaters
     const longURL = urlDatabase[req.params.shortURL];
     res.redirect(longURL); //redirects to long url webpage once short url has been created
   } else {
@@ -60,8 +95,15 @@ app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in ur
 });
 
 app.get("/urls/:shortURL", (req, res) => { //get has been accessed by edit form tag in urls_index
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"] 
+  const id = req.cookies["user_id"]
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[req.params.shortURL]
+  const user = users[id]
+  const templateVars = {
+    urls: urlDatabase,
+    user: user,
+    shortURL: shortURL,
+    longURL: longURL
   };
   res.render("urls_show", templateVars); //
 });
@@ -80,8 +122,8 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => { //form from urls_show accesses post within form tag
-  let shortURL = req.params.shortURL 
-  urlDatabase[shortURL] = req.body.longURL //reassigned the give shortURL to a new longURL
+  let shortURL = req.params.shortURL
+  urlDatabase[shortURL] = req.body.longURL //reassigned the given shortURL to a new longURL
   res.redirect(`/urls/${shortURL}`); //req.body reps data in the specific form
 });
 
@@ -90,20 +132,20 @@ app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from
   res.redirect("/urls");
 });
 
+
 app.post('/login', function (req, res) {
   // Cookies that have not been signed
-  res.cookie('username',req.body.username);
+  res.cookie('user_id', req.body.email);
+  
   res.redirect("/urls")
 })
 
 app.post('/logout', function (req, res) {
   // Cookies that have not been signed
-  
-  res.clearCookie('username',req.body.username);
+
+  res.clearCookie('user_id', req.body.email);
   res.redirect("/urls")
 })
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
