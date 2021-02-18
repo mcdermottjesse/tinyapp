@@ -11,7 +11,7 @@ const PORT = 8080; // default port 8080
 //Middleware
 
 app.use(bodyParser.urlencoded({ extended: true })); //replaces JSON.parse
-app.use(morgan('combined'))
+app.use(morgan('dev'))
 app.use(cookieParser());
 
 
@@ -28,73 +28,117 @@ function generateRandomString() {
   return ranChars;
 };
 
-function emailExists(email) {
+function emailExists(email) { // helper function
   for(let user in users) {
     if (users[user].email === email) {
-      console.log("inside true loop")
-      return true
+     
+      return true;
     }
   }
-return false
-}
+return false;
+};
 
 function passwordExists(password) {
   for(let user in users) {
     if (users[user].password === password) {
-      console.log("inside true loop")
-      return true
+      
+      return true;
     }
   }
-return false
-}
+return false;
+};
 
 function findUserID(email) {
   for(let user in users) {
     if (users[user].email === email) {
-      console.log("inside true loop")
+      
       return users[user].id
     }
   }
   return null
 }
 
+function urlsForUser(id, urldb) {
+  const urlObj = {};
+
+  for(let urlshort in urldb) {
+    if(urldb[urlshort].userID === id) {
+      urlObj[urlshort] = urldb[urlshort] 
+    }
+  }
+return urlObj
+}
+
 const urlDatabase = {
-
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "https://www.google.ca"
-
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const users = {
-  userID: {
-    id: "userID",
+  "aJ48lW": {
+    id: "aJ48lW",
+    email: "user@example.com",
+    password: "password"
+  }
+};
+
+const users2 = {
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "user@example.com",
     password: "password"
   }
 };
 
 
-app.get("/urls/new", (req, res) => {
+app.get("/urls/new", (req, res) => { //GET retrieves info
+  
   const id = req.cookies["user_id"]
   const user = users[id]
+  if(user) {
   const templateVars = {
     urls: urlDatabase,
     user: user
+  
   };
   ///urls/new represents path
-  res.render("urls_new", templateVars); //urls_new represents ejs file
+  res.render("urls_new", templateVars);
+ } else {
+  res.redirect('/login')
+ }
 });
+
 
 app.get("/urls", (req, res) => {
   const id = req.cookies["user_id"]
-  console.log("req.cookies is here", req.cookies)
   const user = users[id]
+
+  //if(urlsForUser(id, urlDatabase)) {
+  if(user) {
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(id, urlDatabase),
     user: user
   };
   res.render("urls_index", templateVars);
+} else {
+  res.redirect('/register')
+}
 });
+
+app.post("/urls", (req, res) => {
+  const id = req.cookies["user_id"]
+//if(urlsForUser(id, urlDatabase)) {
+  let longURL = req.body.longURL;
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = {
+    longURL,
+    userID: id
+  }
+  console.log(urlDatabase);  // Log the POST request body to the console
+  res.redirect(`/urls/${shortURL}`);
+//}
+}); 
+
 
 app.get("/register", (req, res) => {
 
@@ -127,28 +171,26 @@ app.get("/login", (req, res) => {
 
 app.post('/login', function (req, res) {
   if (!emailExists(req.body.email)) {
-    res.status(403).send("Forbidden")
+    res.status(403).send("Email is not registered")
   } if (emailExists(req.body.email) && !passwordExists(req.body.password)) {
-    res.status(403).send("naughty")
+    res.status(403).send("Email or Password does not exist")
   }
   else {
-  console.log("hit req body email", req.body.email)
-  const userID = findUserID(req.body.email)
+  const userID = findUserID(req.body.email);
   res.cookie('user_id', userID);
   res.redirect("/urls")
   }
-})
+});
 
 app.post('/logout', function (req, res) {
   
-
   res.clearCookie('user_id', req.body.email);
-  res.redirect("/urls")
+  res.redirect("/login");
 })
 
 app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in url
   if (urlDatabase[req.params.shortURL]) { //.params contains URL paramaters
-    const longURL = urlDatabase[req.params.shortURL];
+    const longURL = urlDatabase[req.params.shortURL].longURL
     res.redirect(longURL); //redirects to long url webpage once short url has been created
   } else {
     res.status(404).send("404 Not Found");
@@ -156,41 +198,37 @@ app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in ur
 });
 
 app.get("/urls/:shortURL", (req, res) => { //get has been accessed by edit form tag in urls_index
+  
   const id = req.cookies["user_id"]
   const shortURL = req.params.shortURL
   const longURL = urlDatabase[req.params.shortURL]
   const user = users[id]
+  if(user) {
   const templateVars = {
     urls: urlDatabase,
     user: user,
     shortURL: shortURL,
     longURL: longURL
   };
-  res.render("urls_show", templateVars); //
+  res.render("urls_show", templateVars);
+ } else {
+   res.redirect('/login')
+ } //
 });
 
 
 app.get("/", (req, res) => { // "/" home page
+console.log("cookie is here", req.cookies["user_id"])
   res.send("Hello!");
 });
 
-app.post("/urls", (req, res) => {
-  let longURL = req.body.longURL;
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
-  console.log(urlDatabase);  // Log the POST request body to the console
-  res.redirect(`/urls/${shortURL}`);
-});
-
-app.post("/urls/:shortURL", (req, res) => { //form from urls_show accesses post within form tag
-  let shortURL = req.params.shortURL
-  urlDatabase[shortURL] = req.body.longURL //reassigned the given shortURL to a new longURL
-  res.redirect(`/urls/${shortURL}`); //req.body reps data in the specific form
-});
-
 app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from form tag
+  const id = req.cookies["user_id"]
+  const user = users[id]
+  if(user) {
   delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  res.redirect(`/urls`);
+}
 });
 
 
