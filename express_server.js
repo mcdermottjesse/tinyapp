@@ -38,11 +38,30 @@ function emailExists(email) {
 return false
 }
 
+function passwordExists(password) {
+  for(let user in users) {
+    if (users[user].password === password) {
+      console.log("inside true loop")
+      return true
+    }
+  }
+return false
+}
+
+function findUserID(email) {
+  for(let user in users) {
+    if (users[user].email === email) {
+      console.log("inside true loop")
+      return users[user].id
+    }
+  }
+  return null
+}
 
 const urlDatabase = {
 
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "t4H3iO" },
+  "9sm5xK": { longURL: "https://www.google.ca", userID: "p1YnB8" }
 
 };
 
@@ -68,6 +87,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const id = req.cookies["user_id"]
+  console.log("req.cookies is here", req.cookies)
   const user = users[id]
   const templateVars = {
     urls: urlDatabase,
@@ -83,7 +103,7 @@ app.get("/register", (req, res) => {
 
 app.post('/register', (req, res) => {
  
-  if ((!req.body.email) || (!req.body.password) || (emailExists(req.body.email))) {
+  if ((!req.body.email) || (!req.body.password) || emailExists(req.body.email)) {
     console.log(req.body)
     res.status(400).send("Bad Request")
   } else {
@@ -105,6 +125,26 @@ app.get("/login", (req, res) => {
   res.render("urls_login");
 });
 
+app.post('/login', function (req, res) {
+  if (!emailExists(req.body.email)) {
+    res.status(403).send("Forbidden")
+  } if (emailExists(req.body.email) && !passwordExists(req.body.password)) {
+    res.status(403).send("naughty")
+  }
+  else {
+  console.log("hit req body email", req.body.email)
+  const userID = findUserID(req.body.email)
+  res.cookie('user_id', userID);
+  res.redirect("/urls")
+  }
+})
+
+app.post('/logout', function (req, res) {
+  
+
+  res.clearCookie('user_id', req.body.email);
+  res.redirect("/urls")
+})
 
 app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in url
   if (urlDatabase[req.params.shortURL]) { //.params contains URL paramaters
@@ -154,19 +194,6 @@ app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from
 });
 
 
-app.post('/login', function (req, res) {
-  // Cookies that have not been signed
-  res.cookie('user_id', req.body.email);
-  
-  res.redirect("/urls")
-})
-
-app.post('/logout', function (req, res) {
-  // Cookies that have not been signed
-
-  res.clearCookie('user_id', req.body.email);
-  res.redirect("/urls")
-})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
