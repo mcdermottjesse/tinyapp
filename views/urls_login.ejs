@@ -2,25 +2,25 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>Register</title>
+  <title>Login</title>
   <style>
     body {
-      background-color: rgb(197, 241, 197);
+      background-color: rgb(96, 228, 195);
     }
     </style>
 </head>
 <body>
-<form class="form-body" action="/register" method="POST">
+<form class="form-body" action="/login" method="POST">
   <div class="form-group" style= "margin: 2em">
-    <h2><label>Email address</h2></label>
-     <input type="email" id= "email" class= "form-control" name="email" placeholder="Enter email" style="width: 800px;">
+    <h2><label>Username</h2></label>
+     <input type="username" id= "username" class= "form-control" name="email" placeholder="Enter username" style="width: 800px;">
    
   </div>
   <div class="form-group" style= "margin: 2em">
     <h2><label>Password</label></h2>
     <input type="password" id= "password" class="form-control" name= "password" placeholder="Password" style="width: 800px;">
   </div>
-  <button style= "margin: 2em" type="submit" class="btn btn-outline-dark">Register</button>
+  <button style= "margin: 2em" type="submit" class="btn btn-outline-dark">Login</button>
 </form>
 </body>
 </html>
