@@ -60,8 +60,8 @@ function findUserID(email) {
 
 const urlDatabase = {
 
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "t4H3iO" },
-  "9sm5xK": { longURL: "https://www.google.ca", userID: "p1YnB8" }
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "https://www.google.ca"
 
 };
 
