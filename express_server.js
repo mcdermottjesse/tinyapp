@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs')
 // we need cookies so subsequent http requests can be associated with prev requests 
 //via the value stored on browser
 //as http itself is stateless
+const { findUserID, emailExists, urlsForUser, passwordValid } = require('./helpers.js');
 const app = express();
 const bodyParser = require("body-parser"); //for form values
 const PORT = 8080; // default port 8080
@@ -30,7 +31,7 @@ app.set("view engine", "ejs");
 
 
 
-//const { findUserID } = require('/helpers.js');
+
 
 function generateRandomString() {
   let ranChars = '';
@@ -43,7 +44,7 @@ function generateRandomString() {
   return ranChars;
 };
 
-function emailExists(email) { // helper function
+/*function emailExists(email) { // helper function
   for (let user in users) {
     if (users[user].email === email) {
 
@@ -51,9 +52,9 @@ function emailExists(email) { // helper function
     }
   }
   return false;
-};
+}; */
 
-function passwordValid(inputPassword, storedPassword) {
+/*function passwordValid(inputPassword, storedPassword) {
   
     if (bcrypt.compareSync(inputPassword, storedPassword)) {
      
@@ -61,9 +62,23 @@ function passwordValid(inputPassword, storedPassword) {
     }
   
   return false;
-};
+}; */
 
-function findUserID(email, usersdb) {
+/*function findUserID(email, usersdb) {
+  let usersObj = {}
+  
+  for (let user in usersdb) {
+
+    if (usersdb[user].email === email) {
+      
+      usersObj = usersdb[user]
+       
+    }
+
+  }
+  return usersObj;
+} */
+/*function findUserID(email, usersdb) {
   
   for (let user in users) {
 
@@ -74,10 +89,10 @@ function findUserID(email, usersdb) {
     }
   }
   return null
-}
+} */
 
 
-function urlsForUser(id, urldb) {
+/*function urlsForUser(id, urldb) {
   const urlObj = {};
 
   for (let urlshort in urldb) {
@@ -86,7 +101,7 @@ function urlsForUser(id, urldb) {
     }
   }
   return urlObj
-};
+}; */
 
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
@@ -169,7 +184,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email
   const password = bcrypt.hashSync(req.body.password, 10)
 
-  if ((!email) || (!req.body.password) || (emailExists(email))) {
+  if ((!email) || (!req.body.password) || (emailExists(email, users))) {
 
     res.status(400).send("Bad Request")
   
@@ -198,7 +213,7 @@ app.post('/login', function (req, res) {
   const email = req.body.email
   
   const password = req.body.password
-  const foundUser = findUserID(email)
+  const foundUser = findUserID(email, users)
   
   if ((!email) || (!password)) {
 
@@ -211,7 +226,7 @@ app.post('/login', function (req, res) {
     res.status(403).send("Email or password is incorrect");
   }
 
- 
+ console.log("found user here", foundUser)
   const authUser = passwordValid(password, foundUser.password)
   
   const userID = foundUser.id
