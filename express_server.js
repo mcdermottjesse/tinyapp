@@ -43,7 +43,7 @@ function generateRandomString() {
   return ranChars;
 };
 
-/*function emailExists(email) { // helper function
+function emailExists(email) { // helper function
   for (let user in users) {
     if (users[user].email === email) {
 
@@ -51,7 +51,7 @@ function generateRandomString() {
     }
   }
   return false;
-}; */
+};
 
 function passwordValid(inputPassword, storedPassword) {
   
@@ -169,6 +169,11 @@ app.post('/register', (req, res) => {
   const email = req.body.email
   const password = bcrypt.hashSync(req.body.password, 10)
 
+  if ((!email) || (!req.body.password) || (emailExists(email))) {
+
+    res.status(400).send("Bad Request")
+  
+  } else if((email) && (req.body.password)) {
       users[id] = {
         id,
         email,
@@ -177,6 +182,9 @@ app.post('/register', (req, res) => {
 
       console.log("users here" , users)
       res.redirect('/urls');
+    console.log("email is here", emailExists(email))
+    }
+
     });
 
   
@@ -192,25 +200,35 @@ app.post('/login', function (req, res) {
   const password = req.body.password
   const foundUser = findUserID(email)
   
+  if ((!email) || (!password)) {
+
+    res.status(400).send("Bad Request")
+
+  }
+  
+  if(!foundUser) {
+
+    res.status(403).send("Email or password is incorrect");
+  }
+
  
   const authUser = passwordValid(password, foundUser.password)
   
   const userID = foundUser.id
-  
-  
 
-    if (authUser) {
+  if (authUser) {
       
-      req.session.user_id = userID;
-      
-      return res.redirect('/urls');
-    } 
-
+    req.session.user_id = userID;
+    
+    return res.redirect('/urls');
+  } 
+ 
   else {
     
-      res.status(403).send("Email or password is incorrect");
-    
-    } 
+    res.status(403).send("Email or password is incorrect");
+  
+  }
+
 
 });
 
