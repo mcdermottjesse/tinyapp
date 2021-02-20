@@ -19,23 +19,19 @@ const users = {
 describe('findUserByEmail', function() {
   it('should return a user with valid email', function() {
     const user = findUserByEmail("user2@example.com", users);
-    
+
     const expectedOutput = user.email;
 
-
-    assert.strictEqual(expectedOutput, "user2@example.com")
+    assert.strictEqual(expectedOutput, "user2@example.com");
     
-
   })
 
   it('should return a undefined with an invalid email', function() {
     const user = findUserByEmail("user5@example.com", users);
-    
-    const expectedOutput = undefined;
 
+    const expectedOutput = undefined;
 
     assert.strictEqual(expectedOutput, user)
     
-
   })
 });

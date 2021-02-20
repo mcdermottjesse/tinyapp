@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   <title>Register</title>
   <style>
     body {
-      background-color: rgb(197, 241, 197);
+      background-color: rgb(129, 236, 129);
     }
-    </style>
+  </style>
 </head>
+
 <body>
-<form class="form-body" action="/register" method="POST">
-  <div class="form-group" style= "margin: 2em">
-    <h2><label>Email address</h2></label>
-     <input type="email" id= "email" class= "form-control" name="email" placeholder="Enter email" style="width: 800px;">
-   
+  <h2 style="margin: 1em">Tiny URL, Fast, Easy, Safe</h2>
+
+  <div class="inline" style="margin: 2em"><label>Already registered?</label>
+    <a href="http://localhost:8080/login"><button style="margin: 2em" type="submit"
+        class="btn btn-dark">Login</button></a>
   </div>
-  <div class="form-group" style= "margin: 2em">
-    <h2><label>Password</label></h2>
-    <input type="password" id= "password" class="form-control" name= "password" placeholder="Password" style="width: 800px;">
-  </div>
-  <button style= "margin: 2em" type="submit" class="btn btn-outline-dark">Register</button>
-</form>
+
+  <form class="form-body" action="/register" method="POST">
+    <div class="form-group" style="margin: 2em">
+      <h2><label>Email address</h2></label>
+      <input type="email" id="email" class="form-control" name="email" placeholder="Enter email" style="width: 800px;">
+
+    </div>
+    <div class="form-group" style="margin: 2em">
+      <h2><label>Password</label></h2>
+      <input type="password" id="password" class="form-control" name="password" placeholder="Password"
+        style="width: 800px;">
+    </div>
+    <button style="margin: 2em" type="submit" class="btn btn-outline-dark">Register</button>
+  </form>
 </body>
+
 </html>
