@@ -114,11 +114,18 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
 
-  if ((!email) || (!req.body.password) || (emailExists(email, users))) {
+  if (!email || !req.body.password) {
 
-    res.status(400).send("Bad Request");
+    res.status(400).send("No Email or password was detected");
 
-  } else if ((email) && (req.body.password)) {
+  } if (emailExists(email, users)) {
+
+    res.status(400).send("Email is already registered to an account");
+    
+  }
+  
+  
+  else if ((email) && (req.body.password)) {
 
     users[id] = {
       id,
@@ -221,7 +228,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL].longURL = req.body.longURL; //body reps data in the specific form
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect('/urls');
 
 });
 
@@ -236,7 +243,9 @@ app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from
   if (user) {
     delete urlDatabase[req.params.shortURL];
     res.redirect(`/urls`);
-  }
+  
+  } 
+
 });
 
 app.listen(PORT, () => {
