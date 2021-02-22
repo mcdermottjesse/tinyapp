@@ -21,12 +21,7 @@ app.use(cookieSession({
 
 }));
 
-const plaintext = "1234";
-
 app.set("view engine", "ejs");
-
-const hashed = bcrypt.hashSync(plaintext, 10);
-console.log(hashed);
 
 function passwordValid(inputPassword, storedPassword) {
 
@@ -76,14 +71,12 @@ app.get("/urls/new", (req, res) => { //GET retrieves info
 app.get("/urls", (req, res) => {
 
   const id = req.session.user_id;
-  console.log("prining users", users);
 
   const templateVars = {
     urls: urlsForUser(id, urlDatabase),
     user: users[id]
   };
 
-  console.log("temp vars here", templateVars)
   res.render("urls_index", templateVars);
 
 });
@@ -133,7 +126,6 @@ app.post('/register', (req, res) => {
       password
     };
 
-    console.log("users here", users);
     res.redirect('/urls');
   }
 });
@@ -159,8 +151,6 @@ app.post('/login', function (req, res) {
 
     res.status(403).send("Email or password is incorrect");
   }
-
-  console.log("found user here", foundUser);
 
   const authUser = passwordValid(password, foundUser.password);
   const userID = foundUser.id;
@@ -240,10 +230,10 @@ app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from
 
   const id = req.session.user_id;
   const user = users[id];
+
   if (user) {
     delete urlDatabase[req.params.shortURL];
     res.redirect(`/urls`);
-  
   } 
 
 });
