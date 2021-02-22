@@ -24,9 +24,7 @@ app.use(cookieSession({
 app.set("view engine", "ejs");
 
 function passwordValid(inputPassword, storedPassword) {
-
   if (bcrypt.compareSync(inputPassword, storedPassword)) {
-
     return true;
   }
 
@@ -53,7 +51,6 @@ const users = {
 };
 
 app.get("/urls/new", (req, res) => { //GET retrieves info
-
   const id = req.session.user_id; //cookie session layout
   const user = users[id];
   if (user) {
@@ -69,10 +66,8 @@ app.get("/urls/new", (req, res) => { //GET retrieves info
 });
 
 app.get("/urls", (req, res) => {
-
   const id = req.session.user_id;
-
-  const templateVars = {
+  const templateVars = { //templateVars holds objects that are displayed on page
     urls: urlsForUser(id, urlDatabase),
     user: users[id]
   };
@@ -82,16 +77,22 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-
   const id = req.session.user_id;
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(6);
+
+  if (id) {
   urlDatabase[shortURL] = {
     longURL,
     userID: id
   }
 
   res.redirect(`/urls/${shortURL}`);
+
+} else {
+res.redirect('/urls')  
+
+}
 
 });
 
@@ -108,18 +109,14 @@ app.post('/register', (req, res) => {
   const password = bcrypt.hashSync(req.body.password, 10);
 
   if (!email || !req.body.password) {
-
     res.status(400).send("No Email or password was detected");
 
   } if (emailExists(email, users)) {
-
     res.status(400).send("Email is already registered to an account");
-    
-  }
-  
-  
-  else if ((email) && (req.body.password)) {
 
+  }
+
+  else if ((email) && (req.body.password)) {
     users[id] = {
       id,
       email,
@@ -137,18 +134,15 @@ app.get("/login", (req, res) => {
 });
 
 app.post('/login', function (req, res) {
-
   const email = req.body.email;
   const password = req.body.password;
   const foundUser = findUserByEmail(email, users);
 
   if ((!email) || (!password)) {
-
-    res.status(400).send("Bad Request");
+    res.status(400).send("No Email or password was detected");
   }
 
   if (!foundUser) {
-
     res.status(403).send("Email or password is incorrect");
   }
 
@@ -156,13 +150,11 @@ app.post('/login', function (req, res) {
   const userID = foundUser.id;
 
   if (authUser) {
-
     req.session.user_id = userID;
     return res.redirect('/urls');
   }
 
   else {
-
     res.status(403).send("Email or password is incorrect");
   }
 
@@ -175,33 +167,27 @@ app.post('/logout', function (req, res) {
 })
 
 app.get("/u/:shortURL", (req, res) => { //:shortURL reps random characters in url
-
   if (urlDatabase[req.params.shortURL]) { //.params contains URL paramaters
     const longURL = urlDatabase[req.params.shortURL].longURL;
     res.redirect(longURL); //redirects to long url webpage once short url has been created
   } else {
-
     res.status(404).send("404 Not Found");
   }
 });
 
 app.get("/urls/:shortURL", (req, res) => { //get has been accessed by edit form tag in urls_index
-
   const id = req.session.user_id; //cookie session layout
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[req.params.shortURL];
   const user = users[id];
 
   if (user === undefined) {
-
     res.status(404).send("You cannot access this URL as you are not logged in");
 
   } else if (id !== longURL.userID) {
-
     res.status(403).send("This URL does not belong to you");
 
   } else {
-
     const templateVars = {
       urls: urlDatabase,
       user: user,
@@ -215,10 +201,21 @@ app.get("/urls/:shortURL", (req, res) => { //get has been accessed by edit form 
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-
+  const id = req.session.user_id;
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL].longURL = req.body.longURL; //body reps data in the specific form
-  res.redirect('/urls');
+  const longURL = urlDatabase[req.params.shortURL]; 
+  const user = users[id];
+
+  if (user === undefined) {
+    res.status(404).send("You cannot access this URL as you are not logged in");
+
+  } else if (id !== longURL.userID) {
+    res.status(403).send("This URL does not belong to you");
+
+  } else {
+    res.redirect('/urls');
+  }
 
 });
 
@@ -227,14 +224,13 @@ app.get("/", (req, res) => { // "/" home page
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => { //accesses delete action from form tag
-
   const id = req.session.user_id;
   const user = users[id];
 
   if (user) {
-    delete urlDatabase[req.params.shortURL];
-    res.redirect(`/urls`);
-  } 
+  delete urlDatabase[req.params.shortURL];
+  res.redirect(`/urls`);
+} 
 
 });
 
